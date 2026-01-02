@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E39/40 PayTrack - Login</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <!-- Video Background -->
+    <div class="video-background">
+        <video autoplay muted loop playsinline id="bgVideo">
+            <source src="background.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+    <div class="login-container">
+        <div class="login-box">
+            <h1>🏢 E39/40 PayTrack</h1>
+            <h2>Login</h2>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username / Name</label>
+                    <input type="text" id="username" placeholder="Enter username or your name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password / Apartment Number</label>
+                    <input type="text" id="password" placeholder="Enter password or apartment number" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Login As</label>
+                    <select id="role" required>
+                        <option value="admin">Admin</option>
+                        <option value="member">Member</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="login-btn">Login</button>
+                
+                <div id="errorMessage" class="error-message"></div>
+            </form>
+            
+            <div class="demo-credentials">
+                <h3>Login Instructions:</h3>
+                <p><strong>Admin:</strong> Username: admin / Password: admin123</p>
+                <p><strong>Members:</strong> Use your registered name and apartment number from the system</p>
+                <p style="font-size: 0.8rem; margin-top: 10px; color: #999;">Example: If registered as "John Doe" in apartment "A101", use Name: John Doe, Password: A101</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="login.js"></script>
+</body>
+</html>

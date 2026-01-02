@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E39/40 PayTrack</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Video Background -->
+    <div class="video-background">
+        <video autoplay muted loop playsinline id="bgVideo">
+            <source src="background.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🏢 E39/40 PayTrack</h1>
+                    <p class="subtitle">Comprehensive Dues & Payment Tracking System</p>
+                </div>
+                <div class="header-right">
+                    <span class="user-info">Logged in as: <strong id="userName"></strong></span>
+                    <button onclick="logout()" class="logout-btn">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Summary -->
+        <section class="dashboard-summary">
+            <div class="stat-card">
+                <h3>Total Collected (Month)</h3>
+                <p class="stat-value" id="monthlyCollected">₹0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Collected (Overall)</h3>
+                <p class="stat-value" id="totalCollected">₹0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Monthly Expenses</h3>
+                <p class="stat-value expense" id="monthlyExpenses">₹0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Net Balance (Month)</h3>
+                <p class="stat-value balance" id="netBalance">₹0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Pending Dues (Month)</h3>
+                <p class="stat-value pending" id="monthlyPending">₹0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Pending (Overall)</h3>
+                <p class="stat-value pending" id="totalPending">₹0</p>
+            </div>
+        </section>
+
+        <!-- Member Management -->
+        <section class="member-management">
+            <h2>Member Management</h2>
+            
+            <div class="form-container">
+                <h3>Add New Member</h3>
+                <form id="addMemberForm">
+                    <input type="text" id="memberName" placeholder="Full Name" required>
+                    <input type="text" id="apartmentNumber" placeholder="Apartment Number" required>
+                    <input type="tel" id="contactInfo" placeholder="Contact Number" required>
+                    <input type="email" id="emailInfo" placeholder="Email Address">
+                    <button type="submit">Add Member</button>
+                </form>
+            </div>
+
+            <!-- Filters and Search -->
+            <div class="filters-section">
+                <input type="text" id="searchInput" placeholder="🔍 Search by name or apartment...">
+                <select id="statusFilter">
+                    <option value="all">All Members</option>
+                    <option value="paid">Paid Members</option>
+                    <option value="unpaid">Unpaid Members</option>
+                    <option value="overdue">Overdue (2+ Months)</option>
+                </select>
+                <select id="viewMode">
+                    <option value="current">Current Month</option>
+                    <option value="cumulative">Cumulative View</option>
+                </select>
+            </div>
+
+            <!-- Members Table -->
+            <div class="table-container">
+                <table id="membersTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Apartment</th>
+                            <th>Contact</th>
+                            <th>Email</th>
+                            <th>Member Since</th>
+                            <th>Pending Dues</th>
+                            <th>Payment Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="membersTableBody">
+                        <!-- Members will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Expense Management -->
+        <section class="expense-management">
+            <h2>Monthly Expense Management</h2>
+            
+            <div class="form-container">
+                <h3>Add New Expense</h3>
+                <form id="addExpenseForm">
+                    <input type="text" id="expenseName" placeholder="Expense Description (e.g., Security, Cleaning)" required>
+                    <input type="number" id="expenseAmount" placeholder="Amount (₹)" min="0" step="1" required>
+                    <select id="expenseCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="Maintenance">Maintenance & Repairs</option>
+                        <option value="Security">Security Services</option>
+                        <option value="Cleaning">Cleaning Services</option>
+                        <option value="Utilities">Utilities (Water, Electric)</option>
+                        <option value="Gardening">Gardening</option>
+                        <option value="Insurance">Insurance</option>
+                        <option value="Admin">Administrative</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="date" id="expenseDate" required>
+                    <textarea id="expenseNotes" placeholder="Additional notes (optional)" rows="1" style="grid-column: 1 / -1;"></textarea>
+                    <div style="grid-column: 1 / -1;">
+                        <label for="expenseImage" style="display: block; margin-bottom: 5px; font-weight: 500;">📷 Attach Receipt/Image (Optional)</label>
+                        <input type="file" id="expenseImage" accept="image/*" style="width: 100%; padding: 8px; border: 2px dashed #3498db; border-radius: 8px; background: rgba(52, 152, 219, 0.05);">
+                        <div id="expenseImagePreview" style="margin-top: 10px; display: none;">
+                            <img id="expensePreviewImg" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #3498db;">
+                            <button type="button" onclick="removeExpenseImage()" style="display: block; margin-top: 5px; padding: 5px 10px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">Remove Image</button>
+                        </div>
+                    </div>
+                    <button type="submit">Add Expense</button>
+                </form>
+            </div>
+
+            <!-- Expense Filters -->
+            <div class="filters-section">
+                <select id="expenseMonthFilter">
+                    <option value="current">Current Month</option>
+                    <option value="all">All Time</option>
+                </select>
+                <select id="expenseCategoryFilter">
+                    <option value="all">All Categories</option>
+                    <option value="Maintenance">Maintenance & Repairs</option>
+                    <option value="Security">Security Services</option>
+                    <option value="Cleaning">Cleaning Services</option>
+                    <option value="Utilities">Utilities</option>
+                    <option value="Gardening">Gardening</option>
+                    <option value="Insurance">Insurance</option>
+                    <option value="Admin">Administrative</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <!-- Expenses Table -->
+            <div class="table-container">
+                <table id="expensesTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Notes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expensesTableBody">
+                        <!-- Expenses will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Expense Summary by Category -->
+            <div class="expense-summary">
+                <h3>Category-wise Expense Breakdown</h3>
+                <div id="categorySummary" class="category-cards">
+                    <!-- Category summaries will be populated here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment History -->
+        <section class="payment-history">
+            <h2>Recent Payment History</h2>
+            <div class="table-container">
+                <table id="paymentHistoryTable">
+                    <thead>
+                        <tr>
+                            <th>Payment Date</th>
+                            <th>Member Name</th>
+                            <th>Apartment</th>
+                            <th>Amount</th>
+                            <th>For Period</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentHistoryBody">
+                        <!-- Payment history will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Admin Settings -->
+        <section class="admin-settings" id="adminSettings">
+            <h2>⚙️ Admin Settings</h2>
+            <div class="settings-container">
+                <button class="settings-btn" onclick="openAdminCredentialsModal()">Change Username & Password</button>
+                <button class="settings-btn" onclick="openDueIncreaseModal()">Modify Monthly Dues</button>
+                <button class="settings-btn" onclick="openAdvancePaymentModal()">Record Advance Payment</button>
+                <button class="settings-btn" onclick="openAuditLogModal()">View Audit Log</button>
+                <button class="settings-btn danger-btn" onclick="openResetDataModal()">🗑️ Reset All Data</button>
+            </div>
+        </section>
+
+        <!-- Member Payment Dashboard (Member View) -->
+        <section class="member-payment-dashboard" id="memberPaymentDashboard">
+            <h2>💳 My Payment Dashboard</h2>
+            
+            <div class="member-stats">
+                <div class="member-stat-card">
+                    <h3>Current Due</h3>
+                    <p class="stat-value" id="memberCurrentDue">₹0</p>
+                </div>
+                <div class="member-stat-card">
+                    <h3>Advance Balance</h3>
+                    <p class="stat-value" id="memberAdvanceBalance">₹0</p>
+                    <small id="monthsCovered"></small>
+                </div>
+                <div class="member-stat-card">
+                    <h3>Pending Receipts</h3>
+                    <p class="stat-value" id="memberPendingReceipts">0</p>
+                </div>
+            </div>
+
+            <!-- Upload Payment Receipt -->
+            <div class="upload-receipt-form">
+                <h3>Upload Payment Receipt</h3>
+                <form id="uploadReceiptForm">
+                    <div class="form-group">
+                        <label for="receiptMonth">Payment Month:</label>
+                        <select id="receiptMonth" required>
+                            <option value="">Select Month</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="receiptYear">Payment Year:</label>
+                        <select id="receiptYear" required>
+                            <!-- Will be populated with current and previous years -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="receiptAmount">Amount Paid (₹):</label>
+                        <input type="number" id="receiptAmount" min="1" step="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="receiptImage">Receipt Image (JPG, PNG, HEIC):</label>
+                        <input type="file" id="receiptImage" accept="image/jpeg,image/jpg,image/png,image/heic" required>
+                        <small>Max file size: 5MB</small>
+                    </div>
+                    <button type="submit" class="submit-receipt-btn">Upload Receipt</button>
+                </form>
+            </div>
+
+            <!-- My Receipt History -->
+            <div class="receipt-history">
+                <h3>My Receipt History</h3>
+                <div id="memberReceiptHistory" class="receipt-history-list">
+                    <!-- Receipt history will be populated here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Due Change History -->
+        <section class="due-increase-history" id="dueIncreaseHistory">
+            <h2>📊 Due Change History</h2>
+            <div class="table-container">
+                <table id="dueIncreaseTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Change Amount</th>
+                            <th>Effective From</th>
+                            <th>Reason</th>
+                            <th>Changed By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dueIncreaseTableBody">
+                        <!-- Due change history will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Advance Balance Summary (Admin Only) -->
+        <section class="advance-balance-summary" id="advanceBalanceSummary">
+            <h2>💰 Advance Balance Summary</h2>
+            <div class="table-container">
+                <table id="advanceBalanceTable">
+                    <thead>
+                        <tr>
+                            <th>Member Name</th>
+                            <th>Apartment</th>
+                            <th>Advance Balance</th>
+                            <th>Months Covered</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="advanceBalanceTableBody">
+                        <!-- Advance balances will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Feedback & Suggestions -->
+        <section class="feedback-section">
+            <h2>Community Feedback & Suggestions</h2>
+            
+            <div class="feedback-form-container">
+                <h3>Share Your Feedback</h3>
+                <form id="feedbackForm">
+                    <div class="form-group">
+                        <label for="feedbackType">Type:</label>
+                        <select id="feedbackType" required>
+                            <option value="suggestion">Suggestion</option>
+                            <option value="problem">Problem/Issue</option>
+                            <option value="complaint">Complaint</option>
+                            <option value="appreciation">Appreciation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="feedbackTitle">Title:</label>
+                        <input type="text" id="feedbackTitle" placeholder="Brief title for your feedback" required maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="feedbackDescription">Description:</label>
+                        <textarea id="feedbackDescription" placeholder="Describe your feedback in detail..." required rows="4" maxlength="500"></textarea>
+                    </div>
+                    <button type="submit" class="submit-feedback-btn">Submit Feedback</button>
+                </form>
+            </div>
+
+            <!-- Feedback Filters -->
+            <div class="filters-section">
+                <select id="feedbackTypeFilter">
+                    <option value="all">All Types</option>
+                    <option value="suggestion">Suggestions</option>
+                    <option value="problem">Problems</option>
+                    <option value="complaint">Complaints</option>
+                    <option value="appreciation">Appreciations</option>
+                </select>
+                <select id="feedbackSortFilter">
+                    <option value="recent">Most Recent</option>
+                    <option value="votes">Most Voted</option>
+                </select>
+            </div>
+
+            <!-- Feedback List -->
+            <div id="feedbackList" class="feedback-list">
+                <!-- Feedback items will be populated here -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal for Payment -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Record Payment</h2>
+            <div id="memberPaymentInfo"></div>
+            <form id="paymentForm">
+                <input type="hidden" id="paymentMemberId">
+                <label for="paymentAmount">Amount to Pay:</label>
+                <input type="number" id="paymentAmount" min="0" step="100" required>
+                <label for="paymentMonth">For Month:</label>
+                <select id="paymentMonth" required>
+                    <!-- Months will be populated dynamically -->
+                </select>
+                <button type="submit">Confirm Payment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Reset Data Confirmation -->
+    <div id="resetDataModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeResetDataModal()">&times;</span>
+            <h2 style="color: #e74c3c;">⚠️ Reset All Data</h2>
+            <div class="warning-box">
+                <p><strong>WARNING:</strong> This action will permanently delete ALL data including:</p>
+                <ul style="text-align: left; margin: 10px 0;">
+                    <li>All member records</li>
+                    <li>All payment history</li>
+                    <li>All expenses</li>
+                    <li>All receipts and advance payments</li>
+                    <li>All audit logs</li>
+                    <li>All feedback records</li>
+                </ul>
+                <p><strong>This action CANNOT be undone!</strong></p>
+            </div>
+            <form id="resetDataForm">
+                <div class="form-group">
+                    <label for="resetPassword">Re-enter Admin Password to Confirm:</label>
+                    <input type="password" id="resetPassword" placeholder="Enter your admin password" required minlength="6" autocomplete="off">
+                    <small style="color: #666; display: block; margin-top: 5px;">You must enter your current admin password to proceed</small>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" style="background: #e74c3c; flex: 1;">Confirm Reset</button>
+                    <button type="button" onclick="closeResetDataModal()" style="background: #95a5a6; flex: 1;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Admin Credentials -->
+    <div id="adminCredentialsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAdminCredentialsModal()">&times;</span>
+            <h2>Change Admin Credentials</h2>
+            <form id="adminCredentialsForm">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password:</label>
+                    <input type="password" id="currentPassword" placeholder="Enter current password" required>
+                </div>
+                <div class="form-group">
+                    <label for="newUsername">New Username:</label>
+                    <input type="text" id="newUsername" placeholder="Enter new username" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">New Password:</label>
+                    <input type="password" id="newPassword" placeholder="Enter new password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm New Password:</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm new password" required minlength="6">
+                </div>
+                <button type="submit">Update Credentials</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Due Change (Increase/Decrease) -->
+    <div id="dueIncreaseModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDueIncreaseModal()">&times;</span>
+            <h2 id="dueChangeModalTitle">Modify Monthly Dues</h2>
+            <form id="dueIncreaseForm">
+                <div class="form-group">
+                    <label for="changeAction">Action:</label>
+                    <select id="changeAction" required onchange="updateDueChangeLabels()">
+                        <option value="increase">Increase Dues</option>
+                        <option value="decrease">Decrease Dues</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="increaseType"><span id="changeTypeLabel">Increase</span> Type:</label>
+                    <select id="increaseType" required onchange="toggleMemberSelect()">
+                        <option value="global">Global (All Members)</option>
+                        <option value="individual">Individual Member</option>
+                    </select>
+                </div>
+                <div class="form-group" id="memberSelectGroup" style="display: none;">
+                    <label for="increaseMemberId">Select Member:</label>
+                    <select id="increaseMemberId">
+                        <!-- Members will be populated dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="increaseAmount"><span id="changeAmountLabel">Increase</span> Amount (₹):</label>
+                    <input type="number" id="increaseAmount" min="1" step="1" required>
+                    <small id="maxDecreaseHint" style="display:none; color:#666;">Maximum decrease: ₹<span id="maxDecreaseAmount">0</span></small>
+                </div>
+                <div class="form-group">
+                    <label for="effectiveMonth">Effective Month:</label>
+                    <select id="effectiveMonth" required>
+                        <option value="0">January</option>
+                        <option value="1">February</option>
+                        <option value="2">March</option>
+                        <option value="3">April</option>
+                        <option value="4">May</option>
+                        <option value="5">June</option>
+                        <option value="6">July</option>
+                        <option value="7">August</option>
+                        <option value="8">September</option>
+                        <option value="9">October</option>
+                        <option value="10">November</option>
+                        <option value="11">December</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="effectiveYear">Effective Year:</label>
+                    <input type="number" id="effectiveYear" min="2024" required>
+                </div>
+                <div class="form-group">
+                    <label for="increaseReason">Reason (Mandatory):</label>
+                    <textarea id="increaseReason" placeholder="Explain the reason for due change..." required rows="3" maxlength="200"></textarea>
+                </div>
+                <button type="submit" id="dueChangeSubmitBtn">Apply Due Change</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Advance Payment -->
+    <div id="advancePaymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAdvancePaymentModal()">&times;</span>
+            <h2>Record Advance Payment</h2>
+            <form id="advancePaymentForm">
+                <div class="form-group">
+                    <label for="advanceMemberId">Select Member:</label>
+                    <select id="advanceMemberId" required>
+                        <!-- Members will be populated dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="advanceAmount">Advance Amount (₹):</label>
+                    <input type="number" id="advanceAmount" min="1" step="1" required>
+                </div>
+                <button type="submit">Record Advance Payment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Audit Log -->
+    <div id="auditLogModal" class="modal">
+        <div class="modal-content audit-log-modal">
+            <span class="close" onclick="closeAuditLogModal()">&times;</span>
+            <h2>Audit Log</h2>
+            <div class="filters-section">
+                <select id="auditActionFilter">
+                    <option value="all">All Actions</option>
+                    <option value="RECEIPT">Receipt Actions</option>
+                    <option value="ADVANCE">Advance Payments</option>
+                    <option value="DUE">Due Changes</option>
+                </select>
+            </div>
+            <div class="table-container">
+                <table id="auditLogTable">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Admin</th>
+                            <th>Action</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditLogTableBody">
+                        <!-- Audit log will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
